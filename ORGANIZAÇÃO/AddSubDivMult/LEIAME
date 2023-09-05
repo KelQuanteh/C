@@ -1,0 +1,54 @@
+Claro, aqui está um exemplo de um arquivo README.md para o código em seu repositório Git:
+
+```markdown
+# README
+
+## Descrição
+
+Este repositório contém um conjunto de funções simples em C para operações matemáticas básicas, como soma, multiplicação, subtração e divisão. Essas funções foram criadas como parte de um projeto de organização de código em C.
+
+## Estrutura do Repositório
+
+O repositório está estruturado da seguinte forma:
+
+- `main.c`: Este é o arquivo principal do código, que contém as definições das funções matemáticas (soma, multiplicação, subtração e divisão).
+
+- `mad.h`: Este é um arquivo de cabeçalho personalizado que pode conter as declarações das funções e outras definições relevantes. Certifique-se de que ele está devidamente definido para que o código funcione corretamente.
+
+## Uso
+
+Você pode usar este código como ponto de partida para projetos em C que requerem operações matemáticas simples. Basta incluir os arquivos necessários em seu projeto e chamar as funções de acordo com suas necessidades.
+
+Exemplo de uso no código:
+
+```c
+#include <stdio.h>
+#include "mad.h"
+
+int main() {
+    int a = 10;
+    int b = 5;
+
+    printf("Soma: %d\n", soma(a, b));
+    printf("Multiplicação: %d\n", mult(a, b));
+    printf("Subtração: %d\n", sub(a, b));
+    printf("Divisão: %d\n", divi(a, b));
+
+    return 0;
+}
+```
+
+## Contribuições
+
+Contribuições são bem-vindas! Se você tiver melhorias, correções de bugs ou novas funcionalidades para adicionar, sinta-se à vontade para enviar uma solicitação pull.
+
+## Licença
+
+Este código é distribuído sob a [licença MIT](LICENSE).
+
+## Contato
+
+Para qualquer dúvida ou informação adicional, você pode entrar em contato com o autor do repositório:
+
+[KelQuanteh](https://github.com/KelQuanteh)
+```

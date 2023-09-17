@@ -9,12 +9,12 @@ int main(){
 
     strcpy(col, str);
     
-    char* token = strtok(col, ",");
+    char* token = strtok(col, " ");
     int i = 1;
 
     while (token != NULL) {
         printf("Coluna (%d): %s\n", i, token);
-        token = strtok(NULL, ",");
+        token = strtok(NULL, " ");
         i++;
     }
 

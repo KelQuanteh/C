@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
     generate_firewall_config(dados_atributos, qntd_atributos);
   }
 
-  // Clean up allocated memory
+  // Limpe a memória alocada
 
   for (int i = 0; i < qntd_atributos; i++) {
     free(dados_atributos[i].rotulo);
@@ -104,5 +104,6 @@ int main(int argc, char **argv) {
 
   free(entrada);
   fclose(arquivo);
+  
   return 0;
 }

@@ -123,8 +123,7 @@ int main(int argc, char **argv) {
     if (exibicao) {
         exibe_atributos(atributos, numAtributos);
     }
-
-    // Clean up memory
+    
     for (int i = 0; i < numAtributos; i++) {
         free(atributos[i].rotulo);
         free(atributos[i].tipo);

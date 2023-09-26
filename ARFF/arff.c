@@ -11,42 +11,46 @@
 
 #include "arff.h"
 
-void exibe_atributos(atributo *infos, int quantidade) {
-  for (int i = 0; i < quantidade; i++) {
-    printf("<-------------------->\n");
-    printf("Rotulo: %s\n", infos[i].rotulo);
-    printf("Tipo: %s\n", infos[i].tipo);
-    
-    if (infos[i].categorias != NULL) {
-      printf("Categorias: ");
-      for (int j = 0; infos[i].categorias[j] != NULL; j++) {
-        printf("%s, ", infos[i].categorias[j]);
-      }
-      printf("\n");
-    } else {
-      printf("Categorias: \n");
+void exibe_atributos(atributo *infos, int tamanho) {
+    if (infos == NULL) {
+        printf("O arquivo ARFF fornecido é inválido!\n");
+        exit(1);
     }
-  }
+
+    printf("==== ATRIBUTOS DO ARQUIVO ====\n");
+    for (int i = 0; i < tamanho; i++) {
+        printf("-> Atributo #%d\n", i + 1);
+        printf("Rótulo: %s\n", infos[i].rotulo);
+        printf("Tipo: %s\n", infos[i].tipo);
+        if (infos[i].categorias) {
+            printf("Categorias: ");
+            for (int j = 0; infos[i].categorias[j] != NULL; j++) {
+                printf("%s ", infos[i].categorias[j]);
+            }
+            printf("\n");
+        }
+        if (i < tamanho - 1) printf("------------------------------\n");
+    }
+    printf("===============================\n");
 }
 
 int conta_atributos(FILE *arff) {
-  // Function from A1
-  int count = 0;
-  char line[1024];
+    int count = 0;
+    char line[1024];
 
-  while (fgets(line, sizeof(line), arff) != NULL) {
-    if (line[0] == '@' && line[1] == 'a' && line[2] == 't' && line[3] == 't' && line[4] == 'r' && line[5] == 'i' && line[6] == 'b' && line[7] == 'u' && line[8] == 't' && line[9] == 'e') {
-      count++;
-    } else {
-      break; // Stop counting attributes when data section is reached
+    while (fgets(line, sizeof(line), arff) != NULL) {
+        if (strstr(line, "@attribute") == line) {
+            count++;
+        } else if (strstr(line, "@data") == line) {
+            break; 
+        }
     }
-  }
 
-  return count;
+    rewind(arff); // Redefinir o ponteiro do arquivo para o início
+    return count;
 }
 
 void processa_categorias(atributo *elemento, char *categorias) {
-  // Receive a string with categories and update the element with an array of strings (modify the struct)
   char *token;
   char *saveptr;
   int i = 0;
@@ -62,18 +66,17 @@ void processa_categorias(atributo *elemento, char *categorias) {
 }
 
 atributo* processa_atributos(FILE *arff, int quantidade) {
-  // Function from A1 (modify for categorical attributes)
+  
   int i;
   char line[1024];
   atributo *atributos = (atributo *)malloc(quantidade * sizeof(atributo));
 
   for (i = 0; i < quantidade; i++) {
-    atributos[i].categorias = NULL; // Initialize categories to NULL
+    atributos[i].categorias = NULL; 
 
-    // Read an attribute line
     fgets(line, sizeof(line), arff);
 
-    // Extract label, type, and categories (if present)
+    // Extraia rótulo, tipo e categorias (se houver)
     char *token;
     char *saveptr;
     int part = 0;
@@ -86,7 +89,7 @@ atributo* processa_atributos(FILE *arff, int quantidade) {
       } else if (part == 2) {
         atributos[i].tipo = strdup(token);
         if (strcmp(atributos[i].tipo, "categorical") == 0) {
-          // Handle categorical attribute, extract categories
+          // Lidar com atributos categóricos, extrair categorias
           token = strtok_r(NULL, "{", &saveptr);
           if (token != NULL) {
             processa_categorias(&atributos[i], token);
@@ -102,7 +105,7 @@ atributo* processa_atributos(FILE *arff, int quantidade) {
 }
 
 void valida_arff(FILE *arff, atributo *atributos, int quantidade) {
-  // Receive an ARFF file with a reading pointer before "@data"; go through all data lines and validate each element in each column
+  // Receba um arquivo ARFF com um ponteiro de leitura antes de "@data"; passe por todas as linhas de dados e valide cada elemento em cada coluna
   char line[2048];
   int lineNumber = 0;
   int attributeCount = 0;
@@ -110,11 +113,11 @@ void valida_arff(FILE *arff, atributo *atributos, int quantidade) {
   while (fgets(line, sizeof(line), arff)) {
     lineNumber++;
 
-    // Check if the line starts with '@' (indicating an attribute declaration)
+    // Verifique se a linha começa com '@' (se é um atributo ou não)
     if (line[0] == '@') {
       attributeCount++;
     } else {
-      // Assuming data lines start with non-@
+      // senão
       char *token;
       char *saveptr;
       int attributeIndex = 0;
@@ -122,46 +125,55 @@ void valida_arff(FILE *arff, atributo *atributos, int quantidade) {
       token = strtok_r(line, ",", &saveptr);
       while (token != NULL && attributeIndex < quantidade) {
         if (strcmp(atributos[attributeIndex].tipo, "categorical") == 0) {
-          // Validate categorical attribute value
+          // Validar valor do atributo categórico
           if (strchr(token, '{') == NULL || strchr(token, '}') == NULL) {
-            fprintf(stderr, "Error: Invalid categorical attribute value at line %d\n", lineNumber);
+            fprintf(stderr, "Erro: valor de atributo categórico inválido na linha %d\n", lineNumber);
           }
         } else {
-          // Validate other attribute types here if needed
+          // Validar outros tipos de atributos
+          if (strcmp(atributos[attributeIndex].tipo, "numeric") == 0) {
+            // Validar valor do atributo numérico
+            float value;
+            if (sscanf(token, "%f", &value) != 1) {
+              fprintf(stderr, "Erro: valor de atributo numérico inválido na linha %d\n", lineNumber);
+            }
+          } else if (strcmp(atributos[attributeIndex].tipo, "string") == 0) {
+            // Validar valor do atributo string
+            if (strlen(token) == 0) {
+              fprintf(stderr, "Erro: valor de atributo string inválido na linha %d\n", lineNumber);
+            }
+          }
         }
 
         attributeIndex++;
         token = strtok_r(NULL, ",", &saveptr);
       }
 
-      // Check if the number of attributes in the data line matches the expected count
+      // Verifique se o número de atributos na linha de dados corresponde à contagem esperada
       if (attributeIndex != quantidade) {
-        fprintf(stderr, "Error: Incorrect number of attributes at line %d\n", lineNumber);
+        fprintf(stderr, "Erro: Número incorreto de atributos na linha %d\n", lineNumber);
       }
     }
   }
 
-  // Check if the number of declared attributes matches the expected count
+  // Verifique se o número de atributos declarados corresponde à contagem esperada
   if (attributeCount != quantidade) {
-    fprintf(stderr, "Error: Incorrect number of declared attributes\n");
+    fprintf(stderr, "Erro: Número incorreto de atributos declarados\n");
   }
 }
 
-// Function to check if an IP address is benign
+// Função para verificar se um endereço IP é benigno
 bool isBenign(const char *value) {
-    // Example: Consider IP addresses in the range 192.168.0.0 - 192.168.255.255 as benign.
-    // Replace this with your actual criteria.
-    // You may also consider using a more comprehensive list or database for IP classifications.
+    //Endereços IP no intervalo 192.168.0.0 - 192.168.255.255 como benignos.
     if (strncmp(value, "192.168.", 8) == 0) {
         return true;
     }
     return false;
 }
 
-// Function to check if an IP address is potentially malicious
+// Função para verificar se um endereço IP é potencialmente malicioso
 bool isPotentialMalicious(const char *value) {
-    // Example: Consider IP addresses starting with "10." as potentially malicious.
-    // Replace this with your actual criteria.
+    // IP addresses starting with "10." as potentially malicious.
     if (strncmp(value, "10.", 3) == 0) {
         return true;
     }

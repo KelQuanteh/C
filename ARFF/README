@@ -1,0 +1,67 @@
+# ARFF Log Analyzer
+
+This repository contains a C program for analyzing and processing network log files in ARFF format. The program can perform various tasks related to network security, such as identifying and reporting DDoS attacks, classifying source entities, calculating packet size statistics, and generating a blacklist for use with the iptables firewall.
+
+## Project Overview
+
+The program consists of several components:
+
+1. **ARFF File Processing**:
+   - The program utilizes the `arff.c` and `arff.h` files, which provide a library for processing ARFF files. It has been extended to handle a modified structure for categorical attributes, where each category is stored as a separate string in an array.
+
+2. **Log Data Analysis**:
+   - The `log.c` and `log.h` files are responsible for analyzing network log data in ARFF format. These files contain functions to generate various reports and perform data validation.
+
+3. **Main Program**:
+   - The `main.c` file serves as the main entry point for the program. It takes command-line arguments to specify which analysis tasks to perform and processes the input ARFF file accordingly.
+
+## Usage
+
+To run the program, follow the usage format below:
+
+```bash
+./arff -i <input_file> [-p -v -a -b -c -d]
+```
+
+- `-i <input_file>`: Specifies the input ARFF file to be analyzed.
+- `-p`: Display attribute information.
+- `-v`: Perform data validation.
+- `-a`: Generate a report of all attacks and their occurrences (output: "R_ATAQUES.txt").
+- `-b`: Generate a report of malicious, potentially malicious, and benign source entities (output: "R_ENTIDADES.txt").
+- `-c`: Generate a report of average packet sizes for each type of attack (output: "R_TAMANHO.txt").
+- `-d`: Generate a blacklist of malicious source addresses (output: "BLACKLIST.bl").
+
+## Data Processing
+
+Here's an overview of the program's data processing steps:
+
+1. **ARFF File Processing**:
+   - The ARFF file is read and processed using the provided `arff.c` library.
+   - Categorical attributes are parsed and stored as arrays of strings.
+
+2. **Data Validation**:
+   - Data validation is performed to ensure the integrity of the ARFF file.
+   - The program checks if each data row has the correct number of attributes and if the attribute values match their specified types.
+
+3. **Report Generation**:
+   - Various reports are generated based on the chosen options.
+   - Attack reports include the type of attack and its occurrence count.
+   - Entity reports classify source entities as benign, potentially malicious, or malicious based on packet occurrences.
+   - Size reports calculate the average packet size for each attack type.
+   - The blacklist contains malicious source addresses.
+
+## Note
+
+- The program assumes that ARFF attribute lines do not exceed 1024 characters.
+- There are no spaces at the beginning or end of attribute lines.
+- Categorical attribute values are correctly defined.
+- Data rows do not exceed 2048 characters.
+- Commas are used exclusively to separate attributes in data rows.
+
+## Contributing
+
+Feel free to contribute to this project by opening issues or pull requests. If you encounter any bugs or have suggestions for improvements, please let us know.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

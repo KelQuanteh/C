@@ -13,7 +13,7 @@ To run the code, follow the instructions below:
 1. Ensure that you have a C compiler installed on your system.
 2. Clone this repository to your local machine or download the code files.
 3. Open a terminal or command prompt and navigate to the directory where the code files are located.
-4. Compile the code using the C compiler. For example, if you are using GCC, run the following command: `gcc -o program program.c`
+4. Compile the code using the C compiler. For example, if you are using GCC, run the following command: `gcc -o program boulder-dash.c`
 5. Run the compiled program. Use the following command: `./program`
 
 ## File Structure

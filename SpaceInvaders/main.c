@@ -10,6 +10,7 @@
 #include <allegro5/allegro_audio.h>
 
 #include "game.h"
+#include "tiro.h"
 
 int main() {
     //inicializações
@@ -36,7 +37,6 @@ int main() {
     ALLEGRO_BITMAP* start = NULL;  
     ALLEGRO_BITMAP* sprite = NULL; //alien
     ALLEGRO_BITMAP* ship = NULL;   //player
-    ALLEGRO_BITMAP* tiro = NULL;   //player bullet
     ALLEGRO_BITMAP* a_tiro = NULL; //alien bullet
     ALLEGRO_BITMAP* dead = NULL;   //alien morto
     ALLEGRO_BITMAP* disc = NULL;   //disco 
@@ -59,11 +59,25 @@ int main() {
     //criação dos objetos
     alien alien;
     nave player;
-    pistol bullet;
     a_pistol a_bullet;
     disco disco;
     obj obstacle; 
     hit hit_count; 
+    
+    // Declare an array of pistol structures
+    pistol* bullet[N_TIROS];
+
+    // Initialize each element in the array
+    for (int i = 0; i < N_TIROS; i++) {
+        bullet[i] = malloc(sizeof(pistol));
+        if (bullet[i] == NULL) {
+            fprintf(stderr, "Failed to allocate memory for bullet[%d]\n", i);
+            exit(EXIT_FAILURE);
+        }
+        pistol_init(bullet[i]);
+        bullet[i]->width = 20; 
+        bullet[i]->width= 20;
+    }
 
     hit_count[0].count = 0;
     hit_count[1].count = 0;
@@ -78,12 +92,6 @@ int main() {
     player.y = SCREEN_Y - (SCREEN_Y / 8);
     player.height = 50;
     player.width = 50;
-
-    bullet.x = SCREEN_X / 2;
-    bullet.y = SCREEN_Y - (SCREEN_Y / 8);
-    bullet.height = 10;
-    bullet.width = 10;
-
 
     a_bullet[0].x = SCREEN_X / 2;
     a_bullet[0].y = SCREEN_Y;
@@ -120,7 +128,6 @@ int main() {
     start = load_bitmap("bg_inicio.png");
     sprite = load_bitmap("alien1.png");
     ship = load_bitmap("nave.png");
-    tiro = load_bitmap("tiroA.png");
     a_tiro = load_bitmap("tiroB.png");
     dead = load_bitmap("explosion.png");
     disc = load_bitmap("alien2.png");
@@ -141,7 +148,6 @@ int main() {
     saucer_explosion = load_sample("kill.wav");
 
     bool running = true;
-    bool trigger = false;
 
     al_start_timer(timer);
 
@@ -187,7 +193,6 @@ int main() {
                             al_destroy_bitmap(dead); 
                             al_destroy_bitmap(a_tiro);
                             al_destroy_bitmap(barrier);
-                            al_destroy_bitmap(tiro);
                             al_destroy_bitmap(ship);  
                             al_destroy_bitmap(sprite);
                             al_destroy_bitmap(start);
@@ -235,15 +240,19 @@ int main() {
 
                     al_draw_bitmap(disc, disco.x, disco.y, 0);
 
-                    if (collide(bullet.x, bullet.y, disco.x, disco.y, bullet.width, bullet.height, disco.width, disco.height)) {
-                        al_play_sample(saucer_explosion, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
-                        al_draw_bitmap(dead, disco.x, disco.y, 0); 
-                        disco.y = SCREEN_Y;
-                        score += 40; // +40 score
-                        dscx = 2000;
-                        trigger = false;
+                    for (int i = 0; i < N_TIROS; i++){
+                        if (bullet[i]->ativo == ATIVO){
+                            if (collide(bullet[i]->x, bullet[i]->y, disco.x, disco.y, bullet[i]->width, bullet[i]->width, disco.width, disco.height)) {
+                                al_play_sample(saucer_explosion, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
+                                al_draw_bitmap(dead, disco.x, disco.y, 0); 
+                                disco.y = SCREEN_Y;
+                                score += 40; // +40 score
+                                dscx = 2000;
+                                bullet[i]->ativo = NAO_ATIVO;
+                            }
+                        }  
                     }
-
+                    
                     int sort = rand() % 10;
 
                     //alien bullets inicialização
@@ -284,38 +293,41 @@ int main() {
                             //draw alien bullets
                             al_draw_bitmap(a_tiro, a_bullet[0].x, a_bullet[0].y, 0);
                             al_draw_bitmap(a_tiro, a_bullet[1].x, a_bullet[1].y, 0);
-
-                            if (i < 2){
-                                if (collide(bullet.x, bullet.y, alien[j][i].x, alien[j][i].y, bullet.width, bullet.height, alien[j][i].width, alien[j][i].height)) {
-                                    al_draw_bitmap(dead, alien[j][i].x, alien[j][i].y, 0); //draw explosion
-                                    alien[j][i].y = SCREEN_Y;
-                                    al_play_sample(alien_explosion, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
-                                    score += 40; // +10 score
-                                    num_aliens --;
-                                    trigger = false;
-                                }
-                            } else if (i < 5){
-                                if (collide(bullet.x, bullet.y, alien[j][i].x, alien[j][i].y, bullet.width, bullet.height, alien[j][i].width, alien[j][i].height)) {
-                                    al_draw_bitmap(dead, alien[j][i].x, alien[j][i].y, 0); //draw explosion
-                                    alien[j][i].y = SCREEN_Y;
-                                    al_play_sample(alien_explosion, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
-                                    score += 20; // +10 score
-                                    num_aliens --;
-                                    trigger = false;
-                                }
-                            } else {
-                                if (collide(bullet.x, bullet.y, alien[j][i].x, alien[j][i].y, bullet.width, bullet.height, alien[j][i].width, alien[j][i].height)) {
-                                    al_draw_bitmap(dead, alien[j][i].x, alien[j][i].y, 0); //draw explosion
-                                    alien[j][i].y = SCREEN_Y;
-                                    al_play_sample(alien_explosion, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
-                                    score += 10; // +10 score
-                                    num_aliens --;
-                                    trigger = false;
-                                }
-                            }                   
+                            
+                            for (int k = 0; k < N_TIROS; k++){
+                                if(bullet[k]->ativo == ATIVO){
+                                    if (i < 2){
+                                        if (collide(bullet[k]->x, bullet[k]->y, alien[j][i].x, alien[j][i].y, bullet[k]->width, bullet[k]->height, alien[j][i].width, alien[j][i].height)) {
+                                            al_draw_bitmap(dead, alien[j][i].x, alien[j][i].y, 0); //draw explosion
+                                            alien[j][i].y = SCREEN_Y;
+                                            al_play_sample(alien_explosion, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
+                                            score += 40; // +10 score
+                                            num_aliens --;
+                                            bullet[k]->ativo = NAO_ATIVO; 
+                                        }
+                                    } else if (i < 5){
+                                        if (collide(bullet[k]->x, bullet[k]->y, alien[j][i].x, alien[j][i].y, bullet[k]->width, bullet[k]->height, alien[j][i].width, alien[j][i].height)) {
+                                            al_draw_bitmap(dead, alien[j][i].x, alien[j][i].y, 0); //draw explosion
+                                            alien[j][i].y = SCREEN_Y;
+                                            al_play_sample(alien_explosion, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
+                                            score += 20; // +10 score
+                                            num_aliens --;
+                                            bullet[k]->ativo = NAO_ATIVO; 
+                                        }
+                                    } else {
+                                        if (collide(bullet[k]->x, bullet[k]->y, alien[j][i].x, alien[j][i].y, bullet[k]->width, bullet[k]->height, alien[j][i].width, alien[j][i].height)) {
+                                            al_draw_bitmap(dead, alien[j][i].x, alien[j][i].y, 0); //draw explosion
+                                            alien[j][i].y = SCREEN_Y;
+                                            al_play_sample(alien_explosion, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
+                                            score += 10; // +10 score
+                                            num_aliens --;
+                                            bullet[k]->ativo = NAO_ATIVO;
+                                        }
+                                    }
+                                }                   
+                            }
                         }
                     }
-
 
                     //barreiras
                     for (int i = 0; i < 3; i++){
@@ -332,18 +344,9 @@ int main() {
                             }
                         } 
                     }
-                   
-                    if (trigger) {
-                        bullet.y -= 15;
-                    }
 
-                    if (bullet.y < (SCREEN_Y / 4) - 200)
-                        trigger = false;
-
-                    if(!trigger){ 
-                        bullet.x = player.x + 25; 
-                        bullet.y = player.y;
-                    }
+                    for(int i = 0; i < N_TIROS; i++)
+                        aumenta_vel(bullet[i]);
 
                     //kill check
                     if (collide(a_bullet[0].x, a_bullet[0].y, player.x, player.y, a_bullet[0].width, a_bullet[0].height, player.width, player.height) ||
@@ -367,7 +370,8 @@ int main() {
                         al_draw_bitmap(dead, player.x, player.y, 0);
                     } else {
                         al_draw_bitmap(ship, player.x, player.y, 0);
-                        al_draw_bitmap(tiro, bullet.x, bullet.y, 0);
+                        for(int i = 0; i < N_TIROS; i++)
+                            desenha_pistol(bullet[i]);
                     }
 
                     al_draw_textf(font, al_map_rgb(255, 0, 255), (SCREEN_X / 4) + SCREEN_X / 2, 50, 0, "SCORE: %d", score);
@@ -392,7 +396,6 @@ int main() {
                                 al_destroy_bitmap(disc);
                                 al_destroy_bitmap(dead); 
                                 al_destroy_bitmap(a_tiro);
-                                al_destroy_bitmap(tiro);
                                 al_destroy_bitmap(barrier);
                                 al_destroy_bitmap(ship);  
                                 al_destroy_bitmap(sprite);
@@ -415,9 +418,13 @@ int main() {
                         player.x -= 5; 
                     } else if (al_key_down(&keyState, ALLEGRO_KEY_RIGHT) && player.x < SCREEN_X - PLAYER_WIDTH/2) {
                         player.x += 5;  
-                    } else if (al_key_down(&keyState, ALLEGRO_KEY_SPACE) && (!trigger)) {
-                        al_play_sample(fire, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE,0);
-                        trigger = true;
+                    } else if (al_key_down(&keyState, ALLEGRO_KEY_SPACE)) {
+                        for(int i = 0; i < N_TIROS; i++)
+                            if(bullet[i]->ativo == NAO_ATIVO){
+                                trigger(bullet[i], player.x + 25, player.y);
+                                al_play_sample(fire, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE,0);
+                                break;
+                            }
                     }
                     
                     al_flip_display();
@@ -450,6 +457,10 @@ int main() {
                 }   
             }
         }    
+    }
+
+    for (int i = 0; i < N_TIROS; i++) {
+        free(bullet[i]);
     }
 
     al_uninstall_audio();

@@ -48,13 +48,6 @@ typedef struct {
     int y;
     int height;
     int width;
-} pistol;
-
-typedef struct {
-    int x;
-    int y;
-    int height;
-    int width;
 } a_pistol[2];
 
 // Declarações das funções

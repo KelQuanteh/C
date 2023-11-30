@@ -7,7 +7,7 @@
 
 #include "tiro.h"
 
-
+//Inicialize a pistola
 void pistol_init(pistol *t)
 {
     t->ativo = NAO_ATIVO;
@@ -23,6 +23,7 @@ void pistol_init(pistol *t)
     }
 }
 
+//desenhe as balas
 void desenha_pistol(pistol *t)
 {
     if (t->ativo == ATIVO)
@@ -36,6 +37,7 @@ void desenha_pistol(pistol *t)
     }
 }
 
+//atirar
 void trigger(pistol* pistol, int x, int y)
 {
     if (pistol->ativo == NAO_ATIVO)
@@ -47,6 +49,7 @@ void trigger(pistol* pistol, int x, int y)
     }
 }
 
+//mova as balas
 void aumenta_vel(pistol *t){
     t->vel = t->vel;
 }

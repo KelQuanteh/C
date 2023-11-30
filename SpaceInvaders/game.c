@@ -5,7 +5,7 @@
 #include <allegro5/allegro_image.h>
 
 
-// Implementações das funções
+// Carregar imagens
 ALLEGRO_BITMAP* load_bitmap(const char* filename) {
     ALLEGRO_BITMAP* bitmap = al_load_bitmap(filename);
     if (!bitmap) {
@@ -16,6 +16,7 @@ ALLEGRO_BITMAP* load_bitmap(const char* filename) {
     return bitmap;
 }
 
+//Carregar sons
 ALLEGRO_SAMPLE* load_sample(const char* filename) {
     ALLEGRO_SAMPLE* song = al_load_sample(filename);
     if (!song) {
@@ -26,6 +27,7 @@ ALLEGRO_SAMPLE* load_sample(const char* filename) {
     return song;
 }
 
+//verifique colisão
 int collide(int Ax, int Ay, int Bx, int By, int Aw, int Ah, int Bw, int Bh) {
     return Ax + Aw > Bx && Ax < Bx + Bw && Ay + Ah > By && Ay < By + Bh;
 }

@@ -55,7 +55,6 @@ int main() {
     int killed = 0;
     int num_aliens = 70;
  
-
     //criação dos objetos
     alien alien;
     nave player;
@@ -64,10 +63,10 @@ int main() {
     obj obstacle; 
     hit hit_count; 
     
-    // Declare an array of pistol structures
+    // Declare uma série de estruturas de pistola
     pistol* bullet[N_TIROS];
 
-    // Initialize each element in the array
+    // Inicialize cada elemento do array
     for (int i = 0; i < N_TIROS; i++) {
         bullet[i] = malloc(sizeof(pistol));
         if (bullet[i] == NULL) {
@@ -79,20 +78,24 @@ int main() {
         bullet[i]->width= 20;
     }
 
+    //Inicialize o contador de hits/kills
     hit_count[0].count = 0;
     hit_count[1].count = 0;
     hit_count[2].count = 0;     
 
+    //Inicialize o disco voador
     disco.x = 150;
     disco.y = 100;
     disco.height = 50;
     disco.width = 50;
 
+    //Inicialize o jogador
     player.x = SCREEN_X / 2;
     player.y = SCREEN_Y - (SCREEN_Y / 8);
     player.height = 50;
     player.width = 50;
 
+    //inicialize a arma dos inimigos 
     a_bullet[0].x = SCREEN_X / 2;
     a_bullet[0].y = SCREEN_Y;
     a_bullet[0].height = 10;
@@ -103,7 +106,7 @@ int main() {
     a_bullet[1].height = 10;
     a_bullet[1].width = 10;
 
-    font = al_load_ttf_font("space_invaders.ttf", 35, 0); //load font
+    font = al_load_ttf_font("space_invaders.ttf", 35, 0); //carregar font
     if (!font) {
         fprintf(stderr, "Falha ao carregar a fonte!\n");
         return -1;
@@ -169,26 +172,40 @@ int main() {
   
     bool pausa = false;
 
+    //Loop principal do jogo
     while (running) {
-
+        // Limpa a tela para preto
         al_clear_to_color(al_map_rgb(0, 0, 0));
+        
+        // Desenha a tela inicial
         al_draw_bitmap(start, 0, 0, 0);
         al_flip_display();
+
+        // Obtém o estado do teclado
         al_get_keyboard_state(&keyState);
         
+        // Verifica se a tecla ESC foi pressionada para sair do jogo
         if (al_key_down(&keyState, ALLEGRO_KEY_ESCAPE)) {
             running = false;
         } else if (al_key_down(&keyState, ALLEGRO_KEY_ENTER)) {
+            // Transição para o estado de jogo
             play = 1; 
+
+            // Loop de jogo
             while (running || play) {
+                // Verifica se o jogador perdeu todas as vidas
                 if (vida == 0) {
+                    // Tela de fim de jogo
                     al_clear_to_color(al_map_rgb(0, 0, 0));
                     al_draw_textf(font, al_map_rgb(255, 255, 255), SCREEN_X / 2, SCREEN_Y / 4, ALLEGRO_ALIGN_CENTRE, "G A M E  O V E R !!!" );
                     al_draw_textf(font, al_map_rgb(255, 255, 255), SCREEN_X / 2, SCREEN_Y / 3, ALLEGRO_ALIGN_CENTRE, "Score: %d", score);
                     al_draw_textf(font, al_map_rgb(255, 255, 255), SCREEN_X / 2, SCREEN_Y / 2, ALLEGRO_ALIGN_CENTRE, "Replay ?  Y / N" );
                     al_flip_display();
                     al_get_keyboard_state(&keyState);
+
+                    // Verifica a entrada do usuário para recomeçar ou sair
                     if (al_key_down(&keyState, ALLEGRO_KEY_N)) {
+                            // Libera recursos e sai
                             al_destroy_bitmap(disc);
                             al_destroy_bitmap(dead); 
                             al_destroy_bitmap(a_tiro);
@@ -207,6 +224,8 @@ int main() {
                             al_destroy_display(display);
                             play = 0; 
                             running = false;
+
+                            // Reseta o estado do jogo para recomeçar
                     } else if (al_key_down(&keyState, ALLEGRO_KEY_Y)){
                         vida = vidas;
                         score = 0; 
@@ -223,6 +242,7 @@ int main() {
                         al_rest(0.5);
                     }    
                 } else if (vida > 0 && num_aliens != 0){
+                    // Lógica de jogo
                     t++;
                     passo = 0;
                     if (t > tempo) {
@@ -233,7 +253,6 @@ int main() {
                     al_clear_to_color(al_map_rgb(0, 0, 0));
                     al_draw_bitmap(bitmap, 0, 0, 0);
 
-                    //disco voador
                     dscx--;
                     disco.x = dscx;
                     if (disco.x < -disco.width) dscx = 2000;
@@ -246,7 +265,7 @@ int main() {
                                 al_play_sample(saucer_explosion, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
                                 al_draw_bitmap(dead, disco.x, disco.y, 0); 
                                 disco.y = SCREEN_Y;
-                                score += 40; // +40 score
+                                score += 40; 
                                 dscx = 2000;
                                 bullet[i]->ativo = NAO_ATIVO;
                             }
@@ -255,7 +274,6 @@ int main() {
                     
                     int sort = rand() % 10;
 
-                    //alien bullets inicialização
                     if (a_bullet[0].y < SCREEN_Y)
                         a_bullet[0].y += 5;
                     if (a_bullet[1].y < SCREEN_Y)
@@ -301,7 +319,7 @@ int main() {
                                             al_draw_bitmap(dead, alien[j][i].x, alien[j][i].y, 0); //draw explosion
                                             alien[j][i].y = SCREEN_Y;
                                             al_play_sample(alien_explosion, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
-                                            score += 40; // +10 score
+                                            score += 40; // +40 score
                                             num_aliens --;
                                             bullet[k]->ativo = NAO_ATIVO; 
                                         }
@@ -310,7 +328,7 @@ int main() {
                                             al_draw_bitmap(dead, alien[j][i].x, alien[j][i].y, 0); //draw explosion
                                             alien[j][i].y = SCREEN_Y;
                                             al_play_sample(alien_explosion, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
-                                            score += 20; // +10 score
+                                            score += 20; // +20 score
                                             num_aliens --;
                                             bullet[k]->ativo = NAO_ATIVO; 
                                         }
@@ -421,8 +439,8 @@ int main() {
                     } else if (al_key_down(&keyState, ALLEGRO_KEY_SPACE)) {
                         for(int i = 0; i < N_TIROS; i++)
                             if(bullet[i]->ativo == NAO_ATIVO){
-                                trigger(bullet[i], player.x + 25, player.y);
                                 al_play_sample(fire, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE,0);
+                                trigger(bullet[i], player.x + 25, player.y);
                                 break;
                             }
                     }
@@ -440,6 +458,7 @@ int main() {
                     } 
                     al_rest(0.016);
                 } else {
+                    // Estado do jogo após vencer um nível
                     al_flip_display();
                     if (vida < 5) vida ++; 
                     dscx = 2000;

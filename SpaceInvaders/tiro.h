@@ -3,7 +3,7 @@
 #define TIRO_H
 
 #define VEL 15
-#define N_TIROS 3
+#define N_TIROS 1
 #define SCREEN_X 1290
 #define SCREEN_Y 1050
 

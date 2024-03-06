@@ -361,6 +361,17 @@ int main() {
                                     hit_count[i].count++;
                             }
                         } 
+
+                        for (int j = 0; j < N_TIROS; j++){
+                            if (collide(bullet[j]->x, bullet[j]->y, obstacle[i].x, obstacle[i].y, bullet[j]->width, bullet[j]->width, obstacle[i].width, obstacle[i].height)){
+                                bullet[j]->y = SCREEN_Y;
+                                
+                                if (hit_count[i].count == 10){
+                                    obstacle[i].y = SCREEN_Y;
+                                } else
+                                    hit_count[i].count++;
+                            }
+                        } 
                     }
 
                     for(int i = 0; i < N_TIROS; i++)
